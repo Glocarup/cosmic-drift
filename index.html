@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cosmic Drift</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      overflow: hidden;
+      background: #050510;
+      font-family: "Exo 2", "Segoe UI", system-ui, sans-serif;
+      color: #e8e8ff;
+      user-select: none;
+      cursor: crosshair;
+    }
+
+    h1,
+    #scoreDisplay,
+    #livesDisplay,
+    #finalScore,
+    #speedDisplay,
+    #resultScreen .score-big,
+    #resultScreen .result-player {
+      font-family: "Orbitron", sans-serif;
+    }
+
+    #gameCanvas {
+      display: block;
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 1rem;
+      background: radial-gradient(ellipse at 50% 30%, #1a1040 0%, #050510 55%, #000008 100%);
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.55s ease-in-out, visibility 0.55s ease-in-out;
+    }
+
+    .screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .stars-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .stars-bg span {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #fff;
+      border-radius: 50%;
+      opacity: 0.6;
+      animation: twinkle 3s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.9; }
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-weight: 300;
+      letter-spacing: 0.35em;
+      text-indent: 0.35em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #a78bfa, #67e8f9, #f472b6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 0.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .subtitle {
+      font-family: "Exo 2", sans-serif;
+      font-size: 1rem;
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      color: #94a3b8;
+      margin-bottom: 2.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel {
+      width: min(420px, 92vw);
+      max-width: 420px;
+      padding: clamp(1.25rem, 3vw, 2rem) clamp(1.5rem, 4vw, 2.5rem);
+      border: 1px solid rgba(167, 139, 250, 0.25);
+      border-radius: 12px;
+      background: rgba(15, 10, 40, 0.6);
+      backdrop-filter: blur(8px);
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel p,
+    .panel .message,
+    .panel ul,
+    .panel li,
+    .name-field label,
+    .instructions-title,
+    #resultScreen .score-label,
+    #resultScreen .message {
+      font-family: "Exo 2", sans-serif;
+    }
+
+    .panel p,
+    .panel .message {
+      line-height: 1.7;
+      color: #c4b5fd;
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .panel ul {
+      list-style: none;
+      text-align: left;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+      color: #a5b4fc;
+    }
+
+    .panel li {
+      padding: 0.35rem 0;
+      padding-left: 1.2rem;
+      position: relative;
+    }
+
+    .panel li::before {
+      content: "◆";
+      position: absolute;
+      left: 0;
+      color: #67e8f9;
+      font-size: 0.6rem;
+      top: 0.55rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.85rem 2.5rem;
+      font-family: "Exo 2", sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #050510;
+      background: linear-gradient(135deg, #a78bfa, #67e8f9);
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      font-weight: 600;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(103, 232, 249, 0.45);
+    }
+
+    .btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .name-field {
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+
+    .name-field label,
+    .instructions-title,
+    #resultScreen .score-label {
+      display: block;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 0.5rem;
+    }
+
+    .instructions-title {
+      text-align: left;
+      margin-bottom: 0.75rem;
+    }
+
+    #playerName {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-family: "Exo 2", sans-serif;
+      font-size: 1rem;
+      color: #e8e8ff;
+      background: rgba(5, 5, 16, 0.7);
+      border: 1px solid rgba(103, 232, 249, 0.35);
+      border-radius: 8px;
+      outline: none;
+      user-select: text;
+      cursor: text;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    #playerName::placeholder {
+      color: #64748b;
+    }
+
+    #playerName:focus {
+      border-color: #67e8f9;
+      box-shadow: 0 0 16px rgba(103, 232, 249, 0.25);
+    }
+
+    #welcomeScreen .panel ul {
+      margin-bottom: 1.75rem;
+    }
+
+    #resultScreen .score-big {
+      font-size: 4rem;
+      font-weight: 200;
+      color: #67e8f9;
+      line-height: 1;
+      margin: 0.5rem 0 0.25rem;
+    }
+
+    #resultScreen .score-label {
+      margin-bottom: 0.5rem;
+    }
+
+    #resultScreen .result-player {
+      font-size: 1.35rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #a78bfa;
+      margin-bottom: 0.25rem;
+    }
+
+    #resultScreen .message {
+      font-size: 1.1rem;
+      line-height: 1.65;
+      color: #f472b6;
+      margin-bottom: 2rem;
+      min-height: 3em;
+    }
+
+    #hud {
+      position: fixed;
+      top: clamp(0.5rem, 2vh, 1rem);
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem 1rem;
+      padding: 0 clamp(0.75rem, 3vw, 1.5rem);
+      z-index: 5;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.55s ease-in-out, visibility 0.55s ease-in-out;
+    }
+
+    #hud.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #hud span {
+      font-family: "Exo 2", sans-serif;
+      font-size: clamp(0.65rem, 1.5vw, 0.8rem);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(167, 139, 250, 0.9);
+      text-shadow: 0 0 10px rgba(103, 232, 249, 0.5);
+    }
+
+    #hud strong {
+      font-family: "Orbitron", sans-serif;
+      font-weight: 700;
+    }
+
+    #hud .lives {
+      color: rgba(251, 146, 60, 0.95);
+    }
+
+    #hud .speed-tier {
+      color: rgba(103, 232, 249, 0.75);
+      font-size: clamp(0.6rem, 1.3vw, 0.7rem);
+    }
+
+    @media (max-width: 520px) {
+      h1 {
+        letter-spacing: 0.2em;
+        text-indent: 0.2em;
+      }
+
+      .subtitle {
+        letter-spacing: 0.12em;
+        margin-bottom: 1.75rem;
+      }
+
+      #hud {
+        justify-content: center;
+        text-align: center;
+      }
+
+      #hud .speed-tier {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="hud">
+    <span>Puntos: <strong id="scoreDisplay">0</strong></span>
+    <span class="speed-tier" id="speedDisplay">Velocidad ×1.00</span>
+    <span class="lives">Vidas: <strong id="livesDisplay">3</strong></span>
+  </div>
+
+  <div id="welcomeScreen" class="screen">
+    <div class="stars-bg" id="welcomeStars"></div>
+    <h1>Cosmic Drift</h1>
+    <p class="subtitle">Navegá la galaxia. Sobreviví el caos.</p>
+    <div class="panel">
+      <div class="name-field">
+        <label for="playerName">Tu nombre</label>
+        <input type="text" id="playerName" placeholder="Escribí tu nombre" maxlength="20" autocomplete="off">
+      </div>
+      <p class="instructions-title">Instrucciones</p>
+      <ul>
+        <li>Mové el mouse para pilotar la nave</li>
+        <li>Cristales cyan: +10 puntos</li>
+        <li>Fragmentos rojo/naranja: −1 vida</li>
+        <li>Tenés 3 vidas; la caída se acelera cada 10 pts</li>
+      </ul>
+      <button class="btn" id="startBtn" disabled>Comenzar</button>
+    </div>
+  </div>
+
+  <div id="resultScreen" class="screen hidden">
+    <div class="stars-bg" id="resultStars"></div>
+    <h1>Cosmic Drift</h1>
+    <p class="subtitle">Fin del viaje</p>
+    <div class="panel">
+      <p class="result-player" id="resultPlayerName"></p>
+      <p class="score-label">Puntuación final</p>
+      <p class="score-big" id="finalScore">0</p>
+      <p class="message" id="resultMessage"></p>
+      <button class="btn" id="restartBtn">Volver a jugar</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      const welcomeScreen = document.getElementById("welcomeScreen");
+      const resultScreen = document.getElementById("resultScreen");
+      const hud = document.getElementById("hud");
+      const scoreDisplay = document.getElementById("scoreDisplay");
+      const livesDisplay = document.getElementById("livesDisplay");
+      const speedDisplay = document.getElementById("speedDisplay");
+      const finalScoreEl = document.getElementById("finalScore");
+      const resultPlayerNameEl = document.getElementById("resultPlayerName");
+      const resultMessageEl = document.getElementById("resultMessage");
+      const restartBtn = document.getElementById("restartBtn");
+      const playerNameInput = document.getElementById("playerName");
+      const startBtn = document.getElementById("startBtn");
+
+      const MAX_LIVES = 3;
+      const POINTS_PER_CRYSTAL = 10;
+      const BASE_FALL_SPEED = 130;
+      const SPEED_STEP = 0.22;
+      const SPEED_BLEND_RATE = 2.2;
+      const SHIP_SMOOTH_RATE = 7;
+      const ANGLE_SMOOTH_RATE = 10;
+      const INVULN_TIME = 1.2;
+      const STATE = { WELCOME: "welcome", PLAYING: "playing", RESULT: "result" };
+
+      let state = STATE.WELCOME;
+      let width, height;
+      let mouseX = 0, mouseY = 0;
+      let animId = null;
+
+      const ship = { x: 0, y: 0, angle: 0, radius: 18 };
+      let score = 0;
+      let lives = MAX_LIVES;
+      let speedTier = 0;
+      let currentFallSpeed = BASE_FALL_SPEED;
+      let invulnTimer = 0;
+      let lastTime = 0;
+      let spawnTimer = 0;
+      let bgStars = [];
+      let fallingObjects = [];
+      let particles = [];
+      let playerName = "";
+
+      function getTrimmedName() {
+        return playerNameInput.value.trim();
+      }
+
+      function updateStartButton() {
+        const hasName = getTrimmedName().length > 0;
+        startBtn.disabled = !hasName;
+      }
+
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        ship.radius = Math.max(14, Math.min(22, width * 0.016));
+        ship.x = Math.max(ship.radius, Math.min(width - ship.radius, ship.x || width / 2));
+        ship.y = Math.max(ship.radius, Math.min(height - ship.radius, ship.y || height * 0.75));
+        if (state === STATE.WELCOME) {
+          ship.x = width / 2;
+          ship.y = height * 0.75;
+          mouseX = ship.x;
+          mouseY = ship.y;
+        }
+        initBgStars();
+      }
+
+      function smoothFactor(rate, dt) {
+        return 1 - Math.exp(-rate * dt);
+      }
+
+      function randomSpawnX(objectRadius) {
+        const margin = objectRadius + 12;
+        const span = width - margin * 2;
+        if (span <= 0) return width / 2;
+        return margin + Math.random() * span;
+      }
+
+      function normalizeAngle(a) {
+        while (a > Math.PI) a -= Math.PI * 2;
+        while (a < -Math.PI) a += Math.PI * 2;
+        return a;
+      }
+
+      function initBgStars() {
+        bgStars = [];
+        for (let i = 0; i < 120; i++) {
+          bgStars.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            r: Math.random() * 1.5 + 0.3,
+            speed: Math.random() * 0.3 + 0.05,
+            alpha: Math.random() * 0.5 + 0.3
+          });
+        }
+      }
+
+      function createDecorStars(containerId, count) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = "";
+        for (let i = 0; i < count; i++) {
+          const s = document.createElement("span");
+          s.style.left = Math.random() * 100 + "%";
+          s.style.top = Math.random() * 100 + "%";
+          s.style.animationDelay = Math.random() * 3 + "s";
+          s.style.opacity = Math.random() * 0.5 + 0.2;
+          container.appendChild(s);
+        }
+      }
+
+      function getSpeedTier() {
+        return Math.floor(score / POINTS_PER_CRYSTAL);
+      }
+
+      function getTargetFallSpeed() {
+        return BASE_FALL_SPEED * (1 + getSpeedTier() * SPEED_STEP);
+      }
+
+      function updateHud() {
+        scoreDisplay.textContent = score;
+        livesDisplay.textContent = lives;
+        const mult = currentFallSpeed / BASE_FALL_SPEED;
+        speedDisplay.textContent = "Velocidad ×" + mult.toFixed(2);
+      }
+
+      function blendFallSpeeds(dt) {
+        const target = getTargetFallSpeed();
+        const blend = smoothFactor(SPEED_BLEND_RATE, dt);
+        currentFallSpeed += (target - currentFallSpeed) * blend;
+        for (const obj of fallingObjects) {
+          obj.vy += (currentFallSpeed - obj.vy) * blend;
+        }
+        speedDisplay.textContent =
+          "Velocidad ×" + (currentFallSpeed / BASE_FALL_SPEED).toFixed(2);
+      }
+
+      function onScoreChanged() {
+        speedTier = getSpeedTier();
+        updateHud();
+      }
+
+      function resetGame() {
+        score = 0;
+        lives = MAX_LIVES;
+        speedTier = 0;
+        currentFallSpeed = BASE_FALL_SPEED;
+        invulnTimer = 0;
+        spawnTimer = 0;
+        fallingObjects = [];
+        particles = [];
+        ship.x = width / 2;
+        ship.y = height * 0.75;
+        mouseX = ship.x;
+        mouseY = ship.y;
+        updateHud();
+      }
+
+      function showScreen(screen) {
+        welcomeScreen.classList.toggle("hidden", screen !== STATE.WELCOME);
+        resultScreen.classList.toggle("hidden", screen !== STATE.RESULT);
+        hud.classList.toggle("visible", screen === STATE.PLAYING);
+        document.body.style.cursor = screen === STATE.PLAYING ? "none" : "default";
+      }
+
+      function startGame() {
+        const name = getTrimmedName();
+        if (!name) return;
+        playerName = name;
+        state = STATE.PLAYING;
+        resetGame();
+        showScreen(STATE.PLAYING);
+        lastTime = performance.now();
+        if (!animId) loop();
+      }
+
+      function getResultMessage(name, finalScore) {
+        if (finalScore > 100) {
+          return "Comandante " + name + ", dominaste la galaxia. Puntaje: " + finalScore;
+        }
+        if (finalScore >= 50) {
+          return "Buen vuelo, " + name + ". La galaxia te espera de nuevo. Puntaje: " + finalScore;
+        }
+        return "El cosmos no perdona, " + name + ". ¿Lo intentás de nuevo? Puntaje: " + finalScore;
+      }
+
+      function endGame() {
+        state = STATE.RESULT;
+        showScreen(STATE.RESULT);
+        resultPlayerNameEl.textContent = playerName;
+        finalScoreEl.textContent = score;
+        resultMessageEl.textContent = getResultMessage(playerName, score);
+      }
+
+      function restartGame() {
+        resetGame();
+        state = STATE.WELCOME;
+        showScreen(STATE.WELCOME);
+        playerNameInput.value = playerName;
+        playerNameInput.focus();
+        updateStartButton();
+      }
+
+      function spawnFallingObject() {
+        const isCrystal = Math.random() < 0.55;
+        const vy = currentFallSpeed;
+        if (isCrystal) {
+          const r = 14;
+          fallingObjects.push({
+            type: "crystal",
+            x: randomSpawnX(r),
+            y: -30,
+            vy,
+            pulse: Math.random() * Math.PI * 2,
+            r,
+            rot: Math.random() * Math.PI * 2
+          });
+        } else {
+          const size = Math.random() * 14 + 18;
+          fallingObjects.push({
+            type: "fragment",
+            x: randomSpawnX(size),
+            y: -size,
+            vy,
+            size,
+            rot: Math.random() * Math.PI * 2,
+            rotSpeed: (Math.random() - 0.5) * 0.05,
+            verts: 6 + Math.floor(Math.random() * 3)
+          });
+        }
+      }
+
+      function loseLife() {
+        lives--;
+        invulnTimer = INVULN_TIME;
+        burst(ship.x, ship.y, "#fb923c", 20);
+        updateHud();
+        if (lives <= 0) endGame();
+      }
+
+      function collectCrystal(obj) {
+        score += POINTS_PER_CRYSTAL;
+        burst(obj.x, obj.y, "#22d3ee", 14);
+        onScoreChanged();
+      }
+
+      function burst(x, y, color, count) {
+        for (let i = 0; i < count; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const sp = Math.random() * 3 + 1;
+          particles.push({
+            x, y,
+            vx: Math.cos(a) * sp,
+            vy: Math.sin(a) * sp,
+            life: 1,
+            color,
+            size: Math.random() * 3 + 1
+          });
+        }
+      }
+
+      function dist(x1, y1, x2, y2) {
+        const dx = x2 - x1, dy = y2 - y1;
+        return Math.sqrt(dx * dx + dy * dy);
+      }
+
+      function circleHit(ax, ay, ar, bx, by, br) {
+        return dist(ax, ay, bx, by) < ar + br;
+      }
+
+      function drawShip() {
+        ctx.save();
+        ctx.translate(ship.x, ship.y);
+        ctx.rotate(ship.angle);
+
+        if (invulnTimer > 0) {
+          ctx.globalAlpha = 0.45 + Math.sin(invulnTimer * 22) * 0.35;
+        }
+
+        const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, 40);
+        glow.addColorStop(0, "rgba(103, 232, 249, 0.35)");
+        glow.addColorStop(1, "rgba(103, 232, 249, 0)");
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(0, 0, 40, 0, Math.PI * 2);
+        ctx.fill();
+
+        const grad = ctx.createLinearGradient(0, -20, 0, 20);
+        grad.addColorStop(0, "#a78bfa");
+        grad.addColorStop(0.5, "#67e8f9");
+        grad.addColorStop(1, "#f472b6");
+
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, -22);
+        ctx.lineTo(14, 16);
+        ctx.lineTo(0, 10);
+        ctx.lineTo(-14, 16);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        ctx.beginPath();
+        ctx.ellipse(0, -4, 4, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+
+      function drawFragment(f) {
+        ctx.save();
+        ctx.translate(f.x, f.y);
+        ctx.rotate(f.rot);
+        const grad = ctx.createLinearGradient(-f.size, -f.size, f.size, f.size);
+        grad.addColorStop(0, "#ef4444");
+        grad.addColorStop(0.5, "#f97316");
+        grad.addColorStop(1, "#dc2626");
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = "#fdba74";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i < f.verts; i++) {
+          const angle = (i / f.verts) * Math.PI * 2;
+          const r = f.size * (0.7 + Math.sin(i * 2.7) * 0.25);
+          const px = Math.cos(angle) * r;
+          const py = Math.sin(angle) * r;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawCrystal(c) {
+        const pulse = Math.sin(c.pulse) * 0.15 + 1;
+        const r = c.r * pulse;
+        ctx.save();
+        ctx.translate(c.x, c.y);
+        ctx.rotate(c.rot);
+
+        const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 2.2);
+        glow.addColorStop(0, "rgba(34, 211, 238, 0.85)");
+        glow.addColorStop(0.6, "rgba(103, 232, 249, 0.35)");
+        glow.addColorStop(1, "rgba(103, 232, 249, 0)");
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 2.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        const body = ctx.createLinearGradient(0, -r, 0, r);
+        body.addColorStop(0, "#a5f3fc");
+        body.addColorStop(0.5, "#22d3ee");
+        body.addColorStop(1, "#0891b2");
+        ctx.fillStyle = body;
+        ctx.strokeStyle = "#ecfeff";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, -r * 1.2);
+        ctx.lineTo(r * 0.75, 0);
+        ctx.lineTo(0, r * 1.1);
+        ctx.lineTo(-r * 0.75, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.beginPath();
+        ctx.moveTo(0, -r * 0.5);
+        ctx.lineTo(r * 0.2, -r * 0.1);
+        ctx.lineTo(0, r * 0.35);
+        ctx.lineTo(-r * 0.2, -r * 0.1);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function checkCollisions() {
+        if (invulnTimer > 0) return;
+        const hitR = ship.radius * 0.8;
+
+        for (let i = fallingObjects.length - 1; i >= 0; i--) {
+          const obj = fallingObjects[i];
+          let hit = false;
+
+          if (obj.type === "crystal") {
+            hit = circleHit(ship.x, ship.y, hitR, obj.x, obj.y, obj.r);
+            if (hit) {
+              collectCrystal(obj);
+              fallingObjects.splice(i, 1);
+            }
+          } else {
+            hit = circleHit(ship.x, ship.y, hitR, obj.x, obj.y, obj.size * 0.85);
+            if (hit) {
+              fallingObjects.splice(i, 1);
+              loseLife();
+              if (state !== STATE.PLAYING) return;
+            }
+          }
+        }
+      }
+
+      function update(dt) {
+        if (state !== STATE.PLAYING) return;
+
+        if (invulnTimer > 0) invulnTimer -= dt;
+
+        const moveBlend = smoothFactor(SHIP_SMOOTH_RATE, dt);
+        const angleBlend = smoothFactor(ANGLE_SMOOTH_RATE, dt);
+        ship.x += (mouseX - ship.x) * moveBlend;
+        ship.y += (mouseY - ship.y) * moveBlend;
+        ship.x = Math.max(ship.radius, Math.min(width - ship.radius, ship.x));
+        ship.y = Math.max(ship.radius, Math.min(height - ship.radius, ship.y));
+        const targetAngle = Math.atan2(mouseY - ship.y, mouseX - ship.x) + Math.PI / 2;
+        let angleDiff = normalizeAngle(targetAngle - ship.angle);
+        ship.angle += angleDiff * angleBlend;
+
+        blendFallSpeeds(dt);
+
+        const spawnInterval = Math.max(0.45, 0.95 - getSpeedTier() * 0.04);
+        spawnTimer += dt;
+        if (spawnTimer >= spawnInterval) {
+          spawnTimer = 0;
+          spawnFallingObject();
+        }
+
+        for (const s of bgStars) {
+          s.y += s.speed * 60 * dt;
+          if (s.y > height) {
+            s.y = 0;
+            s.x = Math.random() * width;
+          }
+        }
+
+        for (let i = fallingObjects.length - 1; i >= 0; i--) {
+          const obj = fallingObjects[i];
+          obj.y += obj.vy * dt;
+          if (obj.type === "crystal") {
+            obj.pulse += dt * 5;
+            obj.rot += dt * 0.8;
+            if (obj.y > height + 40) fallingObjects.splice(i, 1);
+          } else {
+            obj.rot += obj.rotSpeed;
+            if (obj.y > height + obj.size * 2) fallingObjects.splice(i, 1);
+          }
+        }
+
+        checkCollisions();
+
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx * 60 * dt;
+          p.y += p.vy * 60 * dt;
+          p.life -= dt * 2;
+          if (p.life <= 0) particles.splice(i, 1);
+        }
+
+      }
+
+      function draw() {
+        const grad = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.max(width, height) * 0.7);
+        grad.addColorStop(0, "#12082a");
+        grad.addColorStop(0.5, "#08051a");
+        grad.addColorStop(1, "#020108");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        for (const s of bgStars) {
+          ctx.fillStyle = `rgba(255,255,255,${s.alpha})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        if (state === STATE.PLAYING) {
+          for (const obj of fallingObjects) {
+            if (obj.type === "crystal") drawCrystal(obj);
+            else drawFragment(obj);
+          }
+          drawShip();
+          for (const p of particles) {
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      function loop(now) {
+        animId = requestAnimationFrame(loop);
+        if (!lastTime) lastTime = now;
+        const dt = Math.min((now - lastTime) / 1000, 0.05);
+        lastTime = now;
+        update(dt);
+        draw();
+      }
+
+      playerNameInput.addEventListener("input", updateStartButton);
+      playerNameInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !startBtn.disabled) startGame();
+      });
+      startBtn.addEventListener("click", startGame);
+      restartBtn.addEventListener("click", restartGame);
+
+      function setMouseFromEvent(e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      }
+
+      canvas.addEventListener("mousemove", setMouseFromEvent);
+      window.addEventListener("mousemove", (e) => {
+        if (state === STATE.PLAYING) setMouseFromEvent(e);
+      });
+
+      window.addEventListener("resize", resize);
+
+      createDecorStars("welcomeStars", 80);
+      createDecorStars("resultStars", 80);
+      resize();
+      showScreen(STATE.WELCOME);
+      updateStartButton();
+      lastTime = performance.now();
+      animId = requestAnimationFrame(loop);
+    })();
+  </script>
+</body>
+</html>
