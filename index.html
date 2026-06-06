@@ -50,6 +50,8 @@
       justify-content: center;
       z-index: 10;
       padding: 1rem;
+      overflow-x: hidden;
+      overflow-y: auto;
       background: radial-gradient(ellipse at 50% 30%, #1a1040 0%, #050510 55%, #000008 100%);
       opacity: 1;
       visibility: visible;
@@ -99,6 +101,20 @@
       z-index: 1;
     }
 
+    .promo-text {
+      font-family: "Exo 2", sans-serif;
+      max-width: min(520px, 92vw);
+      padding: 0 0.5rem;
+      margin-bottom: 1rem;
+      font-size: clamp(0.85rem, 2vw, 1.05rem);
+      font-weight: 400;
+      line-height: 1.65;
+      color: #a5f3fc;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
     .subtitle {
       font-family: "Exo 2", sans-serif;
       font-size: 1rem;
@@ -111,8 +127,8 @@
     }
 
     .panel {
-      width: min(420px, 92vw);
-      max-width: 420px;
+      width: min(460px, 92vw);
+      max-width: 460px;
       padding: clamp(1.25rem, 3vw, 2rem) clamp(1.5rem, 4vw, 2.5rem);
       border: 1px solid rgba(167, 139, 250, 0.25);
       border-radius: 12px;
@@ -242,32 +258,159 @@
       margin-bottom: 1.75rem;
     }
 
-    #resultScreen .score-big {
-      font-size: 4rem;
-      font-weight: 200;
-      color: #67e8f9;
-      line-height: 1;
-      margin: 0.5rem 0 0.25rem;
+    #resultScreen {
+      overflow-y: hidden;
+      padding: 1rem;
     }
 
-    #resultScreen .score-label {
+    #resultScreen .result-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-height: 100%;
+      gap: clamp(0.25rem, 1vh, 0.75rem);
+    }
+
+    #resultScreen h1 {
+      font-size: clamp(1.75rem, 4vw, 3rem);
+      letter-spacing: 0.2em;
+      text-indent: 0.2em;
+      margin-bottom: 0.15rem;
+      flex-shrink: 0;
+    }
+
+    #resultScreen .subtitle {
+      font-size: clamp(0.85rem, 1.6vw, 1rem);
+      letter-spacing: 0.15em;
+      margin-bottom: clamp(0.75rem, 2vh, 1.25rem);
+      flex-shrink: 0;
+    }
+
+    #resultScreen .panel {
+      width: 40vw;
+      min-width: min(300px, 90vw);
+      max-width: min(560px, 90vw);
+      padding: clamp(1.25rem, 2.5vh, 2rem) clamp(1.5rem, 3vw, 2.5rem);
+      flex-shrink: 1;
+    }
+
+    #resultScreen .panel p {
       margin-bottom: 0.5rem;
     }
 
+    #resultScreen .score-big {
+      font-size: clamp(2.75rem, 8vmin, 4.5rem);
+      font-weight: 200;
+      color: #67e8f9;
+      line-height: 1;
+      margin: 0.35rem 0 0.5rem;
+      text-shadow: 0 0 24px rgba(103, 232, 249, 0.35);
+    }
+
+    #resultScreen .score-label {
+      font-size: clamp(0.7rem, 1.2vw, 0.85rem);
+      margin-bottom: 0.35rem;
+      letter-spacing: 0.2em;
+    }
+
     #resultScreen .result-player {
-      font-size: 1.35rem;
-      letter-spacing: 0.12em;
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: #a78bfa;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.5rem;
+      line-height: 1.3;
     }
 
     #resultScreen .message {
-      font-size: 1.1rem;
-      line-height: 1.65;
+      font-size: clamp(0.9rem, 1.8vw, 1rem);
+      line-height: 1.55;
       color: #f472b6;
-      margin-bottom: 2rem;
-      min-height: 3em;
+      margin-bottom: 1.25rem;
+    }
+
+    .coupon {
+      width: 100%;
+      margin-bottom: 0.75rem;
+      padding: clamp(0.65rem, 1.5vh, 0.9rem) clamp(0.75rem, 2vw, 1rem);
+      border: 1.5px dashed #67e8f9;
+      border-radius: 6px;
+      background: rgba(6, 10, 24, 0.95);
+      box-shadow:
+        0 0 16px rgba(103, 232, 249, 0.2),
+        inset 0 0 24px rgba(103, 232, 249, 0.05);
+      text-align: center;
+      animation: couponGlow 2.5s ease-in-out infinite;
+    }
+
+    .coupon.hidden {
+      display: none;
+    }
+
+    @keyframes couponGlow {
+      0%, 100% {
+        box-shadow:
+          0 0 14px rgba(103, 232, 249, 0.18),
+          inset 0 0 20px rgba(103, 232, 249, 0.04);
+      }
+      50% {
+        box-shadow:
+          0 0 24px rgba(103, 232, 249, 0.38),
+          inset 0 0 30px rgba(103, 232, 249, 0.08);
+      }
+    }
+
+    .coupon-title {
+      font-family: "Orbitron", sans-serif;
+      font-size: clamp(0.85rem, 2vw, 1rem);
+      font-weight: 700;
+      color: #67e8f9;
+      text-shadow: 0 0 10px rgba(103, 232, 249, 0.75);
+      margin-bottom: 0.35rem;
+      line-height: 1.3;
+    }
+
+    .coupon-body {
+      font-family: "Exo 2", sans-serif;
+      font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+      line-height: 1.45;
+      color: #67e8f9;
+      text-shadow: 0 0 8px rgba(103, 232, 249, 0.5);
+    }
+
+    .coupon-body strong {
+      font-family: "Orbitron", sans-serif;
+      font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #fff;
+      text-shadow: 0 0 12px rgba(103, 232, 249, 0.85);
+    }
+
+    @media (max-height: 700px) {
+      #resultScreen h1 {
+        font-size: clamp(1.4rem, 3.5vw, 2rem);
+      }
+
+      #resultScreen .subtitle {
+        margin-bottom: 0.5rem;
+      }
+
+      #resultScreen .score-big {
+        font-size: clamp(2.25rem, 7vmin, 3.25rem);
+        margin: 0.25rem 0 0.35rem;
+      }
+
+      #resultScreen .panel {
+        padding: 1rem 1.5rem;
+      }
+
+      #resultScreen .message {
+        margin-bottom: 1rem;
+        line-height: 1.4;
+      }
     }
 
     #hud {
@@ -350,6 +493,7 @@
   <div id="welcomeScreen" class="screen">
     <div class="stars-bg" id="welcomeStars"></div>
     <h1>Cosmic Drift</h1>
+    <p class="promo-text">Jugá y ganá un 5% de descuento en tu próxima compra en la Tienda Galáctica. ¡Superá los 100 puntos para reclamar tu premio!</p>
     <p class="subtitle">Navegá la galaxia. Sobreviví el caos.</p>
     <div class="panel">
       <div class="name-field">
@@ -362,6 +506,7 @@
         <li>Cristales cyan: +10 puntos</li>
         <li>Fragmentos rojo/naranja: −1 vida</li>
         <li>Tenés 3 vidas; la caída se acelera cada 10 pts</li>
+        <li>Superá 100 puntos para ganar el cupón COSMIC5</li>
       </ul>
       <button class="btn" id="startBtn" disabled>Comenzar</button>
     </div>
@@ -369,14 +514,20 @@
 
   <div id="resultScreen" class="screen hidden">
     <div class="stars-bg" id="resultStars"></div>
-    <h1>Cosmic Drift</h1>
-    <p class="subtitle">Fin del viaje</p>
-    <div class="panel">
-      <p class="result-player" id="resultPlayerName"></p>
-      <p class="score-label">Puntuación final</p>
-      <p class="score-big" id="finalScore">0</p>
-      <p class="message" id="resultMessage"></p>
-      <button class="btn" id="restartBtn">Volver a jugar</button>
+    <div class="result-layout">
+      <h1>Cosmic Drift</h1>
+      <p class="subtitle">Fin del viaje</p>
+      <div class="panel">
+        <p class="result-player" id="resultPlayerName"></p>
+        <p class="score-label">Puntuación final</p>
+        <p class="score-big" id="finalScore">0</p>
+        <div id="victoryCoupon" class="coupon hidden" aria-live="polite">
+          <p class="coupon-title">🎉 ¡GANASTE!</p>
+          <p class="coupon-body">Código: <strong>COSMIC5</strong> — 5% OFF · Válido 24hs</p>
+        </div>
+        <p class="message" id="resultMessage"></p>
+        <button class="btn" id="restartBtn">Volver a jugar</button>
+      </div>
     </div>
   </div>
 
@@ -396,8 +547,10 @@
       const restartBtn = document.getElementById("restartBtn");
       const playerNameInput = document.getElementById("playerName");
       const startBtn = document.getElementById("startBtn");
+      const victoryCoupon = document.getElementById("victoryCoupon");
 
       const MAX_LIVES = 3;
+      const PRIZE_SCORE = 100;
       const POINTS_PER_CRYSTAL = 10;
       const BASE_FALL_SPEED = 130;
       const SPEED_STEP = 0.22;
@@ -424,6 +577,150 @@
       let fallingObjects = [];
       let particles = [];
       let playerName = "";
+
+      const AudioEngine = (function () {
+        let ac = null;
+        let bgGain = null;
+        let bgOscs = [];
+        let bgLfo = null;
+        let bgStopTimer = null;
+
+        function getCtx() {
+          if (!ac) {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return null;
+            ac = new Ctx();
+          }
+          if (ac.state === "suspended") ac.resume();
+          return ac;
+        }
+
+        function tone(freq, duration, type, volume, when) {
+          const ctx = getCtx();
+          if (!ctx) return;
+          const t0 = when != null ? when : ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = type || "sine";
+          osc.frequency.setValueAtTime(freq, t0);
+          gain.gain.setValueAtTime(0.0001, t0);
+          gain.gain.exponentialRampToValueAtTime(volume, t0 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(t0);
+          osc.stop(t0 + duration + 0.05);
+        }
+
+        function playCollect() {
+          const ctx = getCtx();
+          if (!ctx) return;
+          const t0 = ctx.currentTime;
+          tone(880, 0.1, "sine", 0.12, t0);
+          tone(1320, 0.08, "sine", 0.08, t0 + 0.05);
+        }
+
+        function playHit() {
+          const ctx = getCtx();
+          if (!ctx) return;
+          const t0 = ctx.currentTime;
+          tone(120, 0.18, "sawtooth", 0.14, t0);
+          tone(80, 0.22, "square", 0.08, t0 + 0.04);
+        }
+
+        function playVictory() {
+          const ctx = getCtx();
+          if (!ctx) return;
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          const t0 = ctx.currentTime;
+          notes.forEach(function (freq, i) {
+            tone(freq, 0.22, "sine", 0.11, t0 + i * 0.14);
+          });
+        }
+
+        function playDefeat() {
+          const ctx = getCtx();
+          if (!ctx) return;
+          const t0 = ctx.currentTime;
+          [392, 311, 220, 146].forEach(function (freq, i) {
+            tone(freq, 0.28, "triangle", 0.1, t0 + i * 0.16);
+          });
+        }
+
+        function startBgMusic() {
+          stopBgMusic();
+          const ctx = getCtx();
+          if (!ctx) return;
+
+          bgGain = ctx.createGain();
+          bgGain.gain.value = 0;
+          bgGain.connect(ctx.destination);
+          bgGain.gain.linearRampToValueAtTime(0.045, ctx.currentTime + 1.5);
+
+          bgLfo = ctx.createOscillator();
+          const lfoGain = ctx.createGain();
+          bgLfo.frequency.value = 0.08;
+          lfoGain.gain.value = 8;
+          bgLfo.connect(lfoGain);
+
+          const freqs = [55, 82.5, 110];
+          const types = ["sine", "triangle", "sine"];
+          bgOscs = freqs.map(function (freq, i) {
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = types[i];
+            osc.frequency.value = freq;
+            g.gain.value = i === 0 ? 0.5 : 0.2;
+            if (i === 1) lfoGain.connect(osc.frequency);
+            osc.connect(g);
+            g.connect(bgGain);
+            osc.start();
+            return osc;
+          });
+          bgLfo.start();
+        }
+
+        function stopBgMusic() {
+          if (bgStopTimer) {
+            clearTimeout(bgStopTimer);
+            bgStopTimer = null;
+          }
+          if (!ac || !bgGain) return;
+          const ctx = ac;
+          const t = ctx.currentTime;
+          try {
+            bgGain.gain.cancelScheduledValues(t);
+            bgGain.gain.setValueAtTime(bgGain.gain.value, t);
+            bgGain.gain.linearRampToValueAtTime(0.0001, t + 0.6);
+          } catch (e) { /* ignore */ }
+          bgStopTimer = setTimeout(function () {
+            bgOscs.forEach(function (o) {
+              try { o.stop(); } catch (e) { /* ignore */ }
+            });
+            if (bgLfo) {
+              try { bgLfo.stop(); } catch (e) { /* ignore */ }
+            }
+            bgOscs = [];
+            bgLfo = null;
+            bgGain = null;
+            bgStopTimer = null;
+          }, 700);
+        }
+
+        function unlock() {
+          getCtx();
+        }
+
+        return {
+          unlock: unlock,
+          playCollect: playCollect,
+          playHit: playHit,
+          playVictory: playVictory,
+          playDefeat: playDefeat,
+          startBgMusic: startBgMusic,
+          stopBgMusic: stopBgMusic
+        };
+      })();
 
       function getTrimmedName() {
         return playerNameInput.value.trim();
@@ -550,16 +847,18 @@
       function startGame() {
         const name = getTrimmedName();
         if (!name) return;
+        AudioEngine.unlock();
         playerName = name;
         state = STATE.PLAYING;
         resetGame();
         showScreen(STATE.PLAYING);
         lastTime = performance.now();
+        AudioEngine.startBgMusic();
         if (!animId) loop();
       }
 
       function getResultMessage(name, finalScore) {
-        if (finalScore > 100) {
+        if (finalScore > PRIZE_SCORE) {
           return "Comandante " + name + ", dominaste la galaxia. Puntaje: " + finalScore;
         }
         if (finalScore >= 50) {
@@ -570,13 +869,27 @@
 
       function endGame() {
         state = STATE.RESULT;
+        AudioEngine.stopBgMusic();
         showScreen(STATE.RESULT);
         resultPlayerNameEl.textContent = playerName;
         finalScoreEl.textContent = score;
-        resultMessageEl.textContent = getResultMessage(playerName, score);
+        const wonPrize = score > PRIZE_SCORE;
+        victoryCoupon.classList.toggle("hidden", !wonPrize);
+        if (wonPrize) {
+          resultMessageEl.textContent =
+            "Comandante " + playerName + ", dominaste la galaxia.";
+        } else {
+          resultMessageEl.textContent =
+            getResultMessage(playerName, score) +
+            " ¡Volvé a intentarlo para ganar tu descuento!";
+        }
+        if (wonPrize) AudioEngine.playVictory();
+        else AudioEngine.playDefeat();
       }
 
       function restartGame() {
+        AudioEngine.stopBgMusic();
+        victoryCoupon.classList.add("hidden");
         resetGame();
         state = STATE.WELCOME;
         showScreen(STATE.WELCOME);
@@ -618,6 +931,7 @@
         lives--;
         invulnTimer = INVULN_TIME;
         burst(ship.x, ship.y, "#fb923c", 20);
+        AudioEngine.playHit();
         updateHud();
         if (lives <= 0) endGame();
       }
@@ -625,6 +939,7 @@
       function collectCrystal(obj) {
         score += POINTS_PER_CRYSTAL;
         burst(obj.x, obj.y, "#22d3ee", 14);
+        AudioEngine.playCollect();
         onScoreChanged();
       }
 
@@ -893,6 +1208,9 @@
       });
       startBtn.addEventListener("click", startGame);
       restartBtn.addEventListener("click", restartGame);
+      document.body.addEventListener("click", function initAudioOnce() {
+        AudioEngine.unlock();
+      }, { once: true });
 
       function setMouseFromEvent(e) {
         mouseX = e.clientX;
